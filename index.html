@@ -30,14 +30,15 @@ canvas {
   padding:6px 10px; pointer-events:none; z-index:10;
 }
 .hud-box {
-  background: #FFF8E7;
+  background: rgba(255,248,231,0.96);
   border: 2.5px solid #1a0a00;
   border-radius: 4px;
-  padding: 2px 8px;
+  padding: 3px 10px;
   color: #1a0a00;
-  font-size: 13px; font-weight: 900;
+  font-size: 15px; font-weight: 900;
   letter-spacing: 1px;
   box-shadow: 2px 2px 0 #1a0a00;
+  text-shadow: none;
 }
 .hud-box span { color: #c8960c; }
 #overlay {
@@ -180,6 +181,38 @@ canvas {
   text-align:center;
 }
 
+/* PORTRAIT WARNING */
+#portraitWarn {
+  position:fixed; inset:0; z-index:9999;
+  background: #1a0800;
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:30px; color:#FFF8E7;
+}
+.phone-spin {
+  font-size:72px; display:block; margin-bottom:18px;
+  animation: spinPhone 2.2s ease-in-out infinite;
+}
+@keyframes spinPhone {
+  0%,35%  { transform: rotate(0deg); }
+  65%,100%{ transform: rotate(90deg); }
+}
+#portraitWarn h2 { font-family:'Bangers','Impact',sans-serif; font-size:2em; color:#FFD700;
+  text-shadow:2px 2px 0 #1a0a00; margin-bottom:10px; letter-spacing:2px; }
+#portraitWarn p  { font-family:'Segoe UI',sans-serif; font-size:.95em; line-height:1.7;
+  color:#FFF8E7; max-width:280px; }
+#portraitWarn p b { color:#FFD700; }
+
+/* LANDSCAPE: canvas fills screen height */
+@media (orientation:landscape) and (max-height:520px) {
+  body { justify-content:center; padding:0; }
+  #gameContainer { width:auto; height:100dvh; max-width:none; }
+  canvas { width:auto !important; height:100dvh; max-height:100dvh; }
+  #ui { padding:3px 6px; }
+  .hud-box { font-size:11px; padding:2px 6px; }
+  #mobileCtrl { bottom:4px; }
+  .mBtn { font-size:18px; padding:7px 14px; min-height:44px; min-width:48px; }
+}
+
 @media (max-width:500px) {
   .answerGrid { grid-template-columns:1fr; }
   #overlay h1 { font-size:1.8em; }
@@ -187,6 +220,14 @@ canvas {
 </style>
 </head>
 <body>
+
+<!-- PORTRAIT WARNING -->
+<div id="portraitWarn">
+  <span class="phone-spin">📱</span>
+  <h2>¡Gira tu teléfono!</h2>
+  <p>Este juego funciona en<br><b>modo horizontal (paisaje)</b>.<br><br>Recuesta tu celular de lado para continuar.</p>
+</div>
+
 <div id="gameContainer">
   <canvas id="c" width="800" height="480"></canvas>
 
@@ -201,12 +242,23 @@ canvas {
 
   <!-- MAIN OVERLAY -->
   <div id="overlay">
-    <div style="font-size:2.8em;margin-bottom:4px">🌍</div>
+    <div style="font-size:2.4em;margin-bottom:2px">🌍</div>
     <h1>Guardián del Planeta</h1>
-    <p style="color:#f1c40f;font-size:.78em;margin-bottom:4px">Programa AMA-DGETI · Acciones para el Medio Ambiente 2025-2026</p>
-    <p>Recolecta energía renovable, esquiva contaminantes y derrota a los jefes de la polución.<br>
-    <b>Botones en pantalla</b> para mover y saltar<br>
-    En combate de jefe: <b>toca</b> los puntos débiles · <b>◀ ▶</b> para esquivar</p>
+    <p style="color:#f1c40f;font-size:.75em;margin-bottom:6px">Programa AMA-DGETI · Acciones para el Medio Ambiente 2025-2026</p>
+
+    <div style="background:rgba(255,215,0,0.14);border:2px solid #FFD700;border-radius:8px;
+                padding:10px 14px;margin-bottom:10px;max-width:380px;width:100%;">
+      <div style="font-size:1.5em;margin-bottom:4px">📱↔️</div>
+      <p style="margin:0;font-size:.82em;font-family:'Segoe UI',sans-serif;font-weight:700;color:#FFD700;line-height:1.5;">
+        <b>Recuesta tu celular horizontalmente</b><br>
+        <span style="color:#FFF8E7;">antes de iniciar para ver el juego completo</span>
+      </p>
+    </div>
+
+    <p style="font-size:.78em;margin-bottom:8px;">
+      Recolecta energía, esquiva contaminantes y derrota jefes.<br>
+      <b>◀ ▶</b> mover &nbsp;·&nbsp; <b>▲</b> saltar &nbsp;·&nbsp; En jefe: <b>toca</b> los puntos ⊙
+    </p>
     <button class="btn" onclick="startGame()">🎮 Jugar</button>
     <button class="btn blue" onclick="showScoreboard()">🏆 Marcador</button>
   </div>
@@ -533,11 +585,23 @@ bindMobile('mL','ArrowLeft');
 bindMobile('mR','ArrowRight');
 bindMobile('mJ','Space');
 
-// Show mobile controls on touch devices
+// Show mobile controls and portrait warning on touch devices
 (function detectTouch() {
-  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-    document.getElementById('mobileCtrl').style.display = 'flex';
+  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (!isTouch) return;
+  document.getElementById('mobileCtrl').style.display = 'flex';
+
+  function checkOrientation() {
+    const portrait = window.innerHeight > window.innerWidth;
+    document.getElementById('portraitWarn').style.display = portrait ? 'flex' : 'none';
+    if (portrait && gameActive) {
+      gameActive = false;
+      cancelAnimationFrame(animId);
+    }
   }
+  window.addEventListener('resize', checkOrientation);
+  window.addEventListener('orientationchange', () => setTimeout(checkOrientation, 120));
+  checkOrientation();
 })();
 
 // ── PLAYER UPDATE ──────────────────────────────────────────────────────────────
