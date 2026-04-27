@@ -202,15 +202,31 @@ canvas {
   color:#FFF8E7; max-width:280px; }
 #portraitWarn p b { color:#FFD700; }
 
-/* LANDSCAPE: canvas fills screen height */
+/* LANDSCAPE MOBILE: canvas + barra de controles separada */
 @media (orientation:landscape) and (max-height:520px) {
-  body { justify-content:center; padding:0; }
-  #gameContainer { width:auto; height:100dvh; max-width:none; }
-  canvas { width:auto !important; height:100dvh; max-height:100dvh; }
+  body { padding:0; padding-bottom:60px; }
+  #gameContainer {
+    width:auto; max-width:none; max-height:none;
+    height:calc(100dvh - 60px);
+  }
+  canvas { width:auto !important; height:100% !important; max-height:none; }
   #ui { padding:3px 6px; }
   .hud-box { font-size:11px; padding:2px 6px; }
-  #mobileCtrl { bottom:4px; }
-  .mBtn { font-size:18px; padding:7px 14px; min-height:44px; min-width:48px; }
+
+  /* Barra de controles fija en la parte inferior */
+  #mobileCtrl {
+    position:fixed !important;
+    bottom:0; left:0; right:0;
+    height:60px;
+    background:#1a0800;
+    border-top:3px solid #c8960c;
+    padding:6px 16px;
+    z-index:1000;
+    display:flex !important;
+    align-items:center;
+    pointer-events:none;
+  }
+  .mBtn { font-size:20px; padding:8px 20px; min-height:44px; min-width:56px; }
 }
 
 @media (max-width:500px) {
