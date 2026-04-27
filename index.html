@@ -202,31 +202,52 @@ canvas {
   color:#FFF8E7; max-width:280px; }
 #portraitWarn p b { color:#FFD700; }
 
-/* LANDSCAPE MOBILE: canvas + barra de controles separada */
+/* LANDSCAPE MOBILE: canvas llena el ancho completo */
 @media (orientation:landscape) and (max-height:520px) {
-  body { padding:0; padding-bottom:60px; }
-  #gameContainer {
-    width:auto; max-width:none; max-height:none;
-    height:calc(100dvh - 60px);
-  }
-  canvas { width:auto !important; height:100% !important; max-height:none; }
-  #ui { padding:3px 6px; }
-  .hud-box { font-size:11px; padding:2px 6px; }
+  html { overflow:hidden; }
+  body { padding:0 0 60px 0; height:100dvh; overflow:hidden;
+         align-items:flex-start; justify-content:center; }
 
-  /* Barra de controles fija en la parte inferior */
+  /* Canvas ancho completo, alto proporcional (puede sobresalir abajo — ok) */
+  #gameContainer { width:100vw; max-width:none; height:auto; overflow:visible; }
+  canvas {
+    width:100vw !important;
+    height:calc(100vw * 0.6) !important; /* ratio 800:480 = 0.6 */
+    max-height:none !important;
+    border-left:none; border-right:none; border-radius:0;
+  }
+
+  #ui { padding:4px 8px; }
+  .hud-box { font-size:12px; padding:2px 8px; }
+
+  /* Quiz fijo encima de los controles, con scroll si hace falta */
+  #quizPanel {
+    position:fixed !important;
+    bottom:60px; left:0; right:0;
+    border-radius:0; border-left:none; border-right:none;
+    padding:8px 12px;
+    max-height:52dvh;
+    overflow-y:auto;
+    z-index:200;
+  }
+  #quizPanel h3 { font-size:.82em; margin-bottom:3px; }
+  #quizPanel p  { font-size:.76em; margin-bottom:5px; line-height:1.2; }
+  .ansBtn { padding:7px 8px; min-height:34px; font-size:.76em; }
+
+  /* Barra de controles fija */
   #mobileCtrl {
     position:fixed !important;
     bottom:0; left:0; right:0;
     height:60px;
     background:#1a0800;
     border-top:3px solid #c8960c;
-    padding:6px 16px;
+    padding:6px 20px;
     z-index:1000;
     display:flex !important;
     align-items:center;
     pointer-events:none;
   }
-  .mBtn { font-size:20px; padding:8px 20px; min-height:44px; min-width:56px; }
+  .mBtn { font-size:22px; padding:8px 22px; min-height:46px; min-width:60px; }
 }
 
 @media (max-width:500px) {
